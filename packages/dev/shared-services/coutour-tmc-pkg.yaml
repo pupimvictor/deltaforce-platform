@@ -1,0 +1,17 @@
+fullName:
+  clusterName: shared-services
+  managementClusterName: deltaforce-wcp2
+  name: contour
+  namespaceName: contour-pkg
+  orgId: 6d895d4e-36ca-4931-9e63-007463d6397d
+  provisionerName: dev
+spec:
+  inlineValues:
+    envoy:
+      service:
+        type: LoadBalancer
+  packageRef:
+    packageMetadataName: contour.tanzu.vmware.com
+    versionSelection:
+      constraints: 1.24.4+vmware.1-tkg.1
+  roleBindingScope: CLUSTER
