@@ -1,0 +1,86 @@
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  labels:
+    cluster.x-k8s.io/cluster-name: shared-services
+    run.tanzu.vmware.com/tkr: v1.23.8---vmware.2-tkg.2-zshippable
+  name: shared-services
+  namespace: sbx
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks:
+      - 172.20.0.0/16
+    serviceDomain: cluster.local
+    services:
+      cidrBlocks:
+      - 10.96.0.0/16
+  topology:
+    class: tanzukubernetescluster
+    controlPlane:
+      metadata:
+        annotations:
+          run.tanzu.vmware.com/resolve-os-image: os-name=photon,os-version=3,os-arch=amd64
+      replicas: 1
+    variables:
+    - name: vmClass
+      value: best-effort-2xlarge
+    - name: controlPlaneVolumes
+      value:
+      - capacity:
+          storage: 20G
+        mountPath: /var/lib/etcd
+        name: etcd-0
+        storageClass: vc01cl01-t0compute
+    - name: defaultStorageClass
+      value: vc01cl01-t0compute
+    - name: storageClass
+      value: vc01cl01-t0compute
+    - name: nodePoolVolumes
+      value: []
+    - name: TKR_DATA
+      value:
+        v1.23.8+vmware.2:
+          kubernetesSpec:
+            coredns:
+              imageTag: v1.8.6_vmware.7
+            etcd:
+              imageTag: v3.5.4_vmware.6
+            imageRepository: localhost:5000/vmware.io
+            pause:
+              imageTag: "3.6"
+            version: v1.23.8+vmware.2
+          labels:
+            image-type: vmi
+            os-arch: amd64
+            os-name: photon
+            os-type: linux
+            os-version: "3"
+            run.tanzu.vmware.com/os-image: ob-20611023-photon-3-amd64-vmi-k8s-v1.23.8---vmware.2-tkg.1-zshippable
+            run.tanzu.vmware.com/tkr: v1.23.8---vmware.2-tkg.2-zshippable
+            vmi-name: ob-20611023-photon-3-amd64-vmi-k8s-v1.23.8---vmware.2-tkg.1-zshippable
+          osImageRef:
+            name: ob-20611023-photon-3-amd64-vmi-k8s-v1.23.8---vmware.2-tkg.1-zshippable
+    - name: storageClasses
+      value:
+      - vc01cl01-t0compute
+    version: v1.23.8+vmware.2
+    workers:
+      machineDeployments:
+      - class: node-pool
+        metadata:
+          annotations:
+            run.tanzu.vmware.com/resolve-os-image: os-name=photon,os-version=3,os-arch=amd64
+        name: md-0
+        replicas: 3
+        variables:
+          overrides:
+          - name: storageClass
+            value: vc01cl01-t0compute
+          - name: nodePoolVolumes
+            value:
+            - capacity:
+                storage: 20G
+              mountPath: /var/lib/containerd
+              name: containerd-0
+              storageClass: vc01cl01-t0compute
